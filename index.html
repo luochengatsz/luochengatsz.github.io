@@ -1,32 +1,344 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>NFC Padlock</title>
-  <meta name="description" content="页面描述">
-  <meta name="keywords" content="NFC, NFC Padlock">
-  <meta name="Luo" content="Luo">
-  <!-- 图标 -->
-  <link rel="icon" href="./favicon.ico" type="image/x-icon">
-  <!-- 样式 -->
-  <link rel="stylesheet" href="./css/style.css">
-  <!-- 内联样式 -->
-  <style>
-    /* ... */
-  </style>
-  <!-- 外部脚本（defer 延迟执行） -->
-  <script src="./js/main.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFC Smart PadLock</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Noto Sans SC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans SC', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            900: '#0f172a',
+                            950: '#020617',
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body>
-  <header>NFC Padlock</header>
-  <nav>...</nav>
-  <main>
-    <section>...</section>
-    <article>...</article>
-    <aside>...</aside>
-  </main>
-  <footer>...</footer>
+<body class="bg-slate-950 text-slate-100 antialiased selection:bg-blue-500 selection:text-white min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <!-- Background Ambient Glow Effects -->
+    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div class="absolute -top-40 -right-32 w-96 h-96 rounded-full bg-blue-600/20 blur-3xl"></div>
+        <div class="absolute top-1/2 -left-32 w-80 h-80 rounded-full bg-cyan-500/10 blur-3xl"></div>
+    </div>
+
+    <!-- Top Navigation Bar -->
+    <header class="w-full sticky top-0 z-50 backdrop-blur-md bg-slate-950/75 border-b border-slate-800/60">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <!-- Brand Logo & Title -->
+            <a href="#" class="flex items-center gap-2.5 group focus:outline-none">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:scale-105 transition-transform">
+                    <!-- Mini Padlock + NFC SVG -->
+                    <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="4" y="11" width="16" height="10" rx="2.5"></rect>
+                        <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
+                        <circle cx="12" cy="16" r="1.2" fill="currentColor"></circle>
+                    </svg>
+                </div>
+                <span class="font-bold text-lg tracking-tight text-white">
+                    NFC Smart <span class="text-blue-400">PadLock</span>
+                </span>
+            </a>
+
+            <!-- Language Toggle Button -->
+            <button id="langToggleBtn" aria-label="Switch Language" class="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-sm font-medium text-slate-200 transition-all active:scale-95 shadow-sm cursor-pointer">
+                <svg class="w-4 h-4 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+                <span id="langLabelEn" class="text-white font-semibold">EN</span>
+                <span class="text-slate-600">/</span>
+                <span id="langLabelZh" class="text-slate-400">中文</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        <!-- Hero Section -->
+        <section class="max-w-5xl mx-auto px-4 sm:px-6 pt-12 pb-16 sm:pt-20 sm:pb-24">
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-8">
+                
+                <!-- Left Column: Copy & App Download Buttons -->
+                <div class="w-full lg:w-3/5 text-center lg:text-left space-y-6">
+                    <!-- Status Pill -->
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs sm:text-sm font-medium">
+                        <span class="w-2 h-2 rounded-full bg-blue-400 animate-ping"></span>
+                        <span data-i18n="badge">Keyless Tap-to-Unlock Security</span>
+                    </div>
+
+                    <!-- Main Headline -->
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+                        NFC Smart <span class="bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-500 bg-clip-text text-transparent">PadLock</span>
+                    </h1>
+
+                    <!-- Subtitle / Value Proposition -->
+                    <p data-i18n="subtitle" class="text-base sm:text-lg text-slate-400 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                        Say goodbye to lost keys and forgotten combinations. Tap your smartphone to unlock in milliseconds with bank-grade NFC encryption and effortless access management.
+                    </p>
+
+                    <!-- App Download Section (Clean Icon Badges without long URLs) -->
+                    <div class="pt-3 space-y-3">
+                        <p data-i18n="downloadPrompt" class="text-xs uppercase tracking-wider font-semibold text-slate-400">
+                            Download Official App
+                        </p>
+                        
+                        <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5">
+                            <!-- iOS App Store Button -->
+                            <a href="https://apps.apple.com/app/nfc-unlock/id6762770999" 
+                               target="_blank" 
+                               rel="noopener noreferrer"
+                               aria-label="Download on the App Store"
+                               class="w-full sm:w-auto min-w-[190px] flex items-center justify-center sm:justify-start gap-3.5 px-5 py-3.5 rounded-2xl bg-white text-slate-950 hover:bg-slate-100 active:scale-[0.98] transition-all shadow-lg shadow-white/10 group">
+                                <!-- Apple Logo SVG -->
+                                <svg class="w-7 h-7 fill-current shrink-0 group-hover:scale-105 transition-transform" viewBox="0 0 24 24">
+                                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.33c.64-.78 1.08-1.86.96-2.94-.93.04-2.06.62-2.72 1.4-.58.68-1.1 1.79-.96 2.84 1.04.08 2.08-.52 2.72-1.3z"/>
+                                </svg>
+                                <div class="text-left leading-tight">
+                                    <div data-i18n="iosSub" class="text-[11px] font-medium text-slate-600">Download on the</div>
+                                    <div class="text-base font-bold tracking-tight">App Store</div>
+                                </div>
+                            </a>
+
+                            <!-- Android Google Play Button -->
+                            <a href="https://play.google.com/store/apps/details?id=com.cubeunite.nfc_lock" 
+                               target="_blank" 
+                               rel="noopener noreferrer"
+                               aria-label="Get it on Google Play"
+                               class="w-full sm:w-auto min-w-[190px] flex items-center justify-center sm:justify-start gap-3.5 px-5 py-3.5 rounded-2xl bg-slate-800/90 hover:bg-slate-800 text-white border border-slate-700 hover:border-slate-600 active:scale-[0.98] transition-all shadow-lg shadow-black/30 group">
+                                <!-- Google Play Logo SVG -->
+                                <svg class="w-7 h-7 shrink-0 group-hover:scale-105 transition-transform" viewBox="0 0 24 24">
+                                    <path fill="#4285F4" d="M3.61 1.814L13.793 12 3.61 22.186a1.98 1.98 0 0 1-.485-1.31V3.124c0-.508.187-.972.485-1.31z"/>
+                                    <path fill="#34A853" d="M17.213 8.58L13.793 12 3.61 1.814c.44-.493 1.135-.655 1.77-.295l11.833 7.061z"/>
+                                    <path fill="#FBBC05" d="M20.53 10.558c1.02.608 1.02 2.276 0 2.884l-3.317 1.978L13.793 12l3.42-3.42 3.317 1.978z"/>
+                                    <path fill="#EA4335" d="M13.793 12l3.42 3.42-11.833 7.061c-.635.36-1.33.198-1.77-.295L13.793 12z"/>
+                                </svg>
+                                <div class="text-left leading-tight">
+                                    <div data-i18n="androidSub" class="text-[11px] font-medium text-slate-400">GET IT ON</div>
+                                    <div class="text-base font-bold tracking-tight">Google Play</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Interactive/Stylized NFC PadLock Illustration -->
+                <div class="w-full lg:w-2/5 flex justify-center">
+                    <div class="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center animate-float">
+                        <!-- Concentric NFC Signal Rings -->
+                        <div class="absolute inset-0 rounded-full border border-blue-500/20 animate-pulse-slow"></div>
+                        <div class="absolute inset-5 rounded-full border border-cyan-400/25"></div>
+                        <div class="absolute inset-10 rounded-full bg-gradient-to-b from-blue-500/15 to-cyan-500/5 blur-md"></div>
+
+                        <!-- Central Smart Padlock Card Graphic -->
+                        <div class="relative z-10 w-44 h-52 rounded-3xl bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700/80 shadow-2xl shadow-blue-950/80 flex flex-col items-center justify-center p-5">
+                            <!-- Shackle & Lock SVG -->
+                            <svg class="w-24 h-24 text-blue-400 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" viewBox="0 0 64 64" fill="none">
+                                <!-- Shackle -->
+                                <path d="M20 28V19C20 12.3726 25.3726 7 32 7C38.6274 7 44 12.3726 44 19V28" stroke="#94a3b8" stroke-width="4.5" stroke-linecap="round"/>
+                                <!-- Lock Body -->
+                                <rect x="13" y="27" width="38" height="30" rx="8" fill="url(#lockGrad)" stroke="#60a5fa" stroke-width="2"/>
+                                <!-- NFC Wave Icon inside Lock -->
+                                <path d="M27 38.5C29.5 36.5 34.5 36.5 37 38.5" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+                                <path d="M24 34.5C28.5 31 35.5 31 40 34.5" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" opacity="0.85"/>
+                                <path d="M29.5 42.5C31 41.3 33 41.3 34.5 42.5" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+                                <circle cx="32" cy="46.5" r="1.8" fill="#38bdf8"/>
+                                <defs>
+                                    <linearGradient id="lockGrad" x1="13" y1="27" x2="51" y2="57" gradientUnits="userSpaceOnUse">
+                                        <stop stop-color="#1e293b"/>
+                                        <stop offset="1" stop-color="#0f172a"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+
+                            <!-- Tap Status Indicator -->
+                            <div class="mt-3 flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-medium">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                <span data-i18n="tapReady">NFC Ready</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 3-Card Feature Highlight Section -->
+        <section class="max-w-5xl mx-auto px-4 sm:px-6 pb-20">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                
+                <!-- Feature 1: Instant Tap Unlock -->
+                <div class="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-blue-500/40 transition-colors">
+                    <div class="w-11 h-11 rounded-xl bg-blue-500/15 text-blue-400 flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+                        </svg>
+                    </div>
+                    <h3 data-i18n="feat1Title" class="text-lg font-semibold text-white mb-2">
+                        Instant Tap Unlock
+                    </h3>
+                    <p data-i18n="feat1Desc" class="text-sm text-slate-400 leading-relaxed">
+                        Simply bring your phone close to the padlock. Unlock in under 0.3 seconds with zero pairing delays.
+                    </p>
+                </div>
+
+                <!-- Feature 2: Bank-Grade Security -->
+                <div class="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-cyan-500/40 transition-colors">
+                    <div class="w-11 h-11 rounded-xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            <path d="M9 12l2 2 4-4"></path>
+                        </svg>
+                    </div>
+                    <h3 data-i18n="feat2Title" class="text-lg font-semibold text-white mb-2">
+                        Encrypted Security
+                    </h3>
+                    <p data-i18n="feat2Desc" class="text-sm text-slate-400 leading-relaxed">
+                        Dynamic cryptographic authentication prevents cloning and unauthorized access, keeping your belongings safe.
+                    </p>
+                </div>
+
+                <!-- Feature 3: Smart Access & Logs -->
+                <div class="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-indigo-500/40 transition-colors">
+                    <div class="w-11 h-11 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <h3 data-i18n="feat3Title" class="text-lg font-semibold text-white mb-2">
+                        Easy Access Sharing
+                    </h3>
+                    <p data-i18n="feat3Desc" class="text-sm text-slate-400 leading-relaxed">
+                        Grant or revoke digital keys remotely via the app and track unlock history anytime on iOS and Android.
+                    </p>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- Simple Footer -->
+    <footer class="border-t border-slate-800/60 bg-slate-950/90 py-6">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs sm:text-sm text-slate-500">
+            <div class="font-medium text-slate-400">
+                NFC Smart PadLock
+            </div>
+            <div data-i18n="footerCopy">
+                &copy; 2026 NFC Smart PadLock. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bilingual Translation Script -->
+    <script>
+        // Dictionary containing English (default) and Chinese translations
+        const translations = {
+            en: {
+                badge: "Keyless Tap-to-Unlock Security",
+                subtitle: "Say goodbye to lost keys and forgotten combinations. Tap your smartphone to unlock in milliseconds with bank-grade NFC encryption and effortless access management.",
+                downloadPrompt: "Download Official App",
+                iosSub: "Download on the",
+                androidSub: "GET IT ON",
+                tapReady: "NFC Ready",
+                feat1Title: "Instant Tap Unlock",
+                feat1Desc: "Simply bring your phone close to the padlock. Unlock in under 0.3 seconds with zero pairing delays.",
+                feat2Title: "Encrypted Security",
+                feat2Desc: "Dynamic cryptographic authentication prevents cloning and unauthorized access, keeping your belongings safe.",
+                feat3Title: "Easy Access Sharing",
+                feat3Desc: "Grant or revoke digital keys remotely via the app and track unlock history anytime on iOS and Android.",
+                footerCopy: "© 2026 NFC Smart PadLock. All rights reserved."
+            },
+            zh: {
+                badge: "无钥匙一触即开 · 智能安防",
+                subtitle: "告别丢失钥匙与遗忘密码的烦恼。只需将手机轻触挂锁，即可在毫秒间极速解锁，享受金融级 NFC 加密保护与便捷的权限管理。",
+                downloadPrompt: "下载官方手机客户端",
+                iosSub: "下载于",
+                androidSub: "立即下载",
+                tapReady: "NFC 已就绪",
+                feat1Title: "一触极速解锁",
+                feat1Desc: "手机轻触挂锁感应区，无需繁琐蓝牙配对，0.3 秒内响应即刻开启。",
+                feat2Title: "银行级加密防护",
+                feat2Desc: "采用动态密钥安全认证算法，有效防止卡片复制与非法破解，全方位守护财物安全。",
+                feat3Title: "便捷授权与记录",
+                feat3Desc: "通过手机 App 随时分享或收回电子钥匙，支持 iOS 与 Android 双平台实时查看开锁记录。",
+                footerCopy: "© 2026 NFC Smart PadLock 版权所有"
+            }
+        };
+
+        // Default language state: English
+        let currentLang = 'en';
+
+        const langToggleBtn = document.getElementById('langToggleBtn');
+        const langLabelEn = document.getElementById('langLabelEn');
+        const langLabelZh = document.getElementById('langLabelZh');
+
+        // Function to apply selected language to all tagged DOM elements
+        function applyLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+
+            // Update all elements with data-i18n attribute
+            const elements = document.querySelectorAll('[data-i18n]');
+            elements.forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+
+            // Update toggle button active highlight
+            if (lang === 'en') {
+                langLabelEn.classList.remove('text-slate-400');
+                langLabelEn.classList.add('text-white', 'font-semibold');
+                langLabelZh.classList.remove('text-white', 'font-semibold');
+                langLabelZh.classList.add('text-slate-400');
+            } else {
+                langLabelZh.classList.remove('text-slate-400');
+                langLabelZh.classList.add('text-white', 'font-semibold');
+                langLabelEn.classList.remove('text-white', 'font-semibold');
+                langLabelEn.classList.add('text-slate-400');
+            }
+        }
+
+        // Toggle language on button click
+        langToggleBtn.addEventListener('click', () => {
+            const nextLang = currentLang === 'en' ? 'zh' : 'en';
+            applyLanguage(nextLang);
+        });
+    </script>
 </body>
 </html>
